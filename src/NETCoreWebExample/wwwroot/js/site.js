@@ -22,12 +22,16 @@
 
     var $sidebarAndWWarpper = $("#sidebar,#wrapper");
 
+    //Go find sidebarToggle and find the child i classed fa
+    var $icon = $("#sidebarToggle i.fa");
     $("#sidebarToggle").on("click", function () {
         $sidebarAndWWarpper.toggleClass("hide-sidebar");
         if ($sidebarAndWWarpper.hasClass("hide-sidebar")) {
-            $(this).text("Show Sidebar");
+            $icon.removeClass("fa-angle-left");
+            $icon.addClass("fa-angle-right");
         } else {
-            $(this).text("Hide Sidebar");
+            $icon.removeClass("fa-angle-right");
+            $icon.addClass("fa-angle-left");
         }
     });
 })();
