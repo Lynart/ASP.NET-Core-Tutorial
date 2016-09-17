@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using NETCoreWebExample.Models;
+using NETCoreWebExample.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,23 +14,45 @@ namespace NETCoreWebExample.Controllers.Api
     [Route("api/trips")]
     public class TripsController : Controller
     {
+        private ILogger<TripsController> _logger;
         private IWorldRepository _repository;
 
-        public TripsController(IWorldRepository repository)
+        public TripsController(IWorldRepository repository, ILogger<TripsController> logger)
         {
             _repository = repository;
+            _logger = logger;
         }
 
         [HttpGet("")]
         public IActionResult Get()
         {
-            return Ok(_repository.GetAllTrips());
+            try
+            {
+                var results = _repository.GetAllTrips();
+                return Ok(Mapper.Map<IEnumerable<TripViewModel>>(results));
+            }
+            catch (Exception ex)
+            {
+                //Tell users they messed something up but also log for yourself
+                _logger.LogError($"Failed to get all trips: {ex}");
+                return BadRequest("Error occurred");
+            }
         }
 
         [HttpPost("")]
-        public IActionResult Post([FromBody]Trip theTrip)
+        public async Task<IActionResult> Post([FromBody]TripViewModel theTrip)
         {
-            return Ok(true);
+            if (ModelState.IsValid)
+            {
+                var newTrip = Mapper.Map<Trip>(theTrip);
+                _repository.AddTrip(newTrip);
+
+                if (await _repository.SaveChangesAsync())
+                {
+                    return Created($"api/trips/{theTrip.Name}", Mapper.Map<TripViewModel>(newTrip));
+                }
+            }
+            return BadRequest("Failed to save the trip");
         }
     }
 }

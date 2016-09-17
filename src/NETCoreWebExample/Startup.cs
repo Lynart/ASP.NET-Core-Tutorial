@@ -11,6 +11,8 @@ using Microsoft.Extensions.Logging;
 using NETCoreWebExample.Services;
 using NETCoreWebExample.Models;
 using Newtonsoft.Json.Serialization;
+using AutoMapper;
+using NETCoreWebExample.ViewModels;
 
 namespace NETCoreWebExample
 {
@@ -54,6 +56,7 @@ namespace NETCoreWebExample
             services.AddDbContext<WorldContext>();
             //Create 1 per request cycle. TODO Need to review what scoped is
             services.AddScoped<IWorldRepository, WorldRepository>();
+            services.AddTransient<GeoCoordsService>();
             services.AddTransient<WorldContextSeedData>();
             services.AddLogging();
             //ATTENTION - MVC requires classes, interfaces, etc.
@@ -71,6 +74,12 @@ namespace NETCoreWebExample
             WorldContextSeedData seeder,
             ILoggerFactory factory)
         {
+            Mapper.Initialize(config =>
+            {
+                config.CreateMap<TripViewModel, Trip>().ReverseMap();
+                config.CreateMap<StopViewModel, Stop>().ReverseMap();
+            });
+
             //Used to see errors, would only apply to development machines
             //You can set what the machine is in the project properties/debug
             if (env.IsDevelopment())
