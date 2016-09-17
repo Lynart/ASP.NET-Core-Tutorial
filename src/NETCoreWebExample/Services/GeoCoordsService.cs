@@ -30,6 +30,7 @@ namespace NETCoreWebExample.Services
                 Message = "Failed to get coordinates"
             };
 
+            //Note this is set in your environmental variables; not in this project
             var apiKey = _config["Keys:BingKey"];
             var encodedName = WebUtility.UrlEncode(name);
             var url = $"http://dev.virtualearth.net/REST/v1/Locations?q={encodedName}&key={apiKey}";
